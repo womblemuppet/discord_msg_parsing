@@ -1,9 +1,21 @@
-module Stopwords
-  def self.is_valid_token?(token)
-    # Filter out weird looking words - normal words only please
-    return false unless token =~ /^[a-z]+$|^\w+\-\w+|^[a-z]+[0-9]+[a-z]+$|^[0-9]+[a-z]+|^[a-z]+[0-9]+$/
+module Language
+  def self.chunk_into_sentences(words)
+    words.each_with_object([[]]) do |word, acc|
+      if word =~ Language::sentence_ending_matcher && word !~ Language::words_with_periods
+        acc.last.push(word.gsub(sentence_ending_matcher, ""))
+        acc.push([])
+        next
+      end
 
-    # Filter out stopwords - these words are too boring
+      acc.last.push(word)
+    end
+  end
+
+  def self.is_valid_token?(token)
+    # List from Ruby LLP list on github - "stopwords" 
+
+    return false unless token =~ /^[a-z]+$|^\w+\-\w+|^[a-z]+[0-9]+[a-z]+$|^[0-9]+[a-z]+|^[a-z]+[0-9]+$/
+    
     return false if token.in?([
       'a','cannot','into','our','thus','about','co','is','ours','to','above',
       'could','it','ourselves','together','across','down','its','out','too',
@@ -37,4 +49,18 @@ module Stopwords
 
     return true
   end
+
+  # Could not find gem that didn't split "I'm" etc as two different sentences
+  def self.contractions
+    /\w+'m|\w+'ve|\w+n't/i
+  end
+
+  def self.words_with_periods
+    /[ap]\.m(?=.)/
+  end
+
+  def self.sentence_ending_matcher
+    /[.!?]/
+  end
+
 end

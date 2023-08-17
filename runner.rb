@@ -1,8 +1,7 @@
 require "active_support/all"
 require "json"
-require 'pragmatic_segmenter'
 
-require_relative "stopwords"
+require_relative "language"
 require_relative "ngrams"
 require_relative "word_count"
 
@@ -20,6 +19,12 @@ class Runner
     
     result = @function.call(@data)
     
+    bigrams = result[:bigrams]
+    trigrams = result[:trigrams]
+
+    File.write("./data/bigrams.json", JSON::pretty_generate(bigrams))
+    File.write("./data/trigrams.json", JSON::pretty_generate(trigrams))
+
     puts result
     puts "Finished. Total duration #{Time.now - start_time} seconds"
   end
