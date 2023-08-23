@@ -11,6 +11,16 @@ module Language
     end
   end
 
+  def self.is_valid_token?(word)
+    return false if word !~ Language::valid_token_regex
+
+    if word.length == 1 
+      return word =~ /[iaou]/
+    else
+      return true
+    end
+  end
+
   def self.valid_token_regex
     /^[a-z]+$|^\w+\-\w+|^[a-z]+[0-9]+[a-z]+$|^[0-9]+[a-z]+|^[a-z]+[0-9]+$/
   end

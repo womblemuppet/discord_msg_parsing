@@ -11,7 +11,7 @@ def make_ngrams
 
         sentence.each_cons(2) do |raw_w1, raw_w2|
           break if raw_w1.in?(Language::stopwords)
-          break unless [raw_w1, raw_w2].all? { |word| word =~ Language::valid_token_regex }
+          break unless [raw_w1, raw_w2].all? { |word| Language::is_valid_token?(word) }
 
           w1 = Language.clean_up_word(raw_w1)
           w2 = Language.clean_up_word(raw_w2)
@@ -23,7 +23,7 @@ def make_ngrams
 
         sentence.each_cons(3) do |raw_w1, raw_w2, raw_w3|
           break if raw_w1.in?(Language::stopwords)
-          break unless [raw_w1, raw_w2, raw_w3].all? { |word| word =~ Language::valid_token_regex }
+          break unless [raw_w1, raw_w2, raw_w3].all? { |word| Language::is_valid_token?(word) }
 
           w1 = Language.clean_up_word(raw_w1)
           w2 = Language.clean_up_word(raw_w2)
