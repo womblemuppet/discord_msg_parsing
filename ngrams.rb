@@ -9,16 +9,25 @@ def make_ngrams
       sentences.each do |sentence|
         next unless sentence.first.present?
 
-        sentence.each_cons(2) do |w1, w2|
-          break unless Language::is_valid_token?(w2)
+        sentence.each_cons(2) do |raw_w1, raw_w2|
+          break if raw_w1.in?(Language::stopwords)
+          break unless [raw_w1, raw_w2].all? { |word| word =~ Language::valid_token_regex }
+
+          w1 = Language.clean_up_word(raw_w1)
+          w2 = Language.clean_up_word(raw_w2)
 
           bigrams[w1] ||= {}
           bigrams[w1][w2] ||= 0
           bigrams[w1][w2] += 1
         end
 
-        sentence.each_cons(3) do |w1, w2, w3|
-          break unless Language::is_valid_token?(w2) && Language::is_valid_token?(w3)
+        sentence.each_cons(3) do |raw_w1, raw_w2, raw_w3|
+          break if raw_w1.in?(Language::stopwords)
+          break unless [raw_w1, raw_w2, raw_w3].all? { |word| word =~ Language::valid_token_regex }
+
+          w1 = Language.clean_up_word(raw_w1)
+          w2 = Language.clean_up_word(raw_w2)
+          w3 = Language.clean_up_word(raw_w3)
 
           trigrams[w1] ||= {}
           trigrams[w1][[w2, w3]] ||= 0

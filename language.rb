@@ -2,7 +2,7 @@ module Language
   def self.chunk_into_sentences(words)
     words.each_with_object([[]]) do |word, acc|
       if word =~ Language::sentence_ending_matcher && word !~ Language::words_with_periods
-        acc.last.push(word.gsub(sentence_ending_matcher, ""))
+        acc.last.push(word)
         acc.push([])
         next
       end
@@ -11,12 +11,14 @@ module Language
     end
   end
 
-  def self.is_valid_token?(token)
+  def self.valid_token_regex
+    /^[a-z]+$|^\w+\-\w+|^[a-z]+[0-9]+[a-z]+$|^[0-9]+[a-z]+|^[a-z]+[0-9]+$/
+  end
+
+  def self.stopwords
     # List from Ruby LLP list on github - "stopwords" 
 
-    return false unless token =~ /^[a-z]+$|^\w+\-\w+|^[a-z]+[0-9]+[a-z]+$|^[0-9]+[a-z]+|^[a-z]+[0-9]+$/
-    
-    return false if token.in?([
+    [
       'a','cannot','into','our','thus','about','co','is','ours','to','above',
       'could','it','ourselves','together','across','down','its','out','too',
       'after','during','itself','over','toward','afterwards','each','last','own',
@@ -45,9 +47,7 @@ module Language
       'only','this','yet','beyond','ie','onto','those','you','both','if','or',
       'though','your','but','in','other','through','yours','by','inc','others',
       'throughout','yourself','can','indeed','otherwise','thru','yourselves'
-    ])
-
-    return true
+    ]
   end
 
   # Could not find gem that didn't split "I'm" etc as two different sentences
@@ -63,4 +63,10 @@ module Language
     /[.!?]/
   end
 
+  def self.clean_up_word(word)
+    match = word.match(valid_token_regex)
+    raise unless match
+
+    return match[0].downcase
+  end
 end
