@@ -3,7 +3,7 @@ def make_ngrams
     bigrams = {}
     trigrams = {}
 
-    data["messages"].each do |message_data|
+    data[:message_data].each do |message_data|
       sentences = Language::chunk_into_sentences(message_data["content"].split)
 
       sentences.each do |sentence|
@@ -37,9 +37,13 @@ def make_ngrams
 
     end
 
+    File.write("./data/bigrams.rb", bigrams.to_s)
+    File.write("./data/trigrams.rb", trigrams.to_s)
+    puts "Saved bigrams and trigrams to ./data/"
+
     return {
-      bigrams: bigrams,
-      trigrams: trigrams
+      bigrams: bigrams.length,
+      trigrams: trigrams.length
     }
   end
 end

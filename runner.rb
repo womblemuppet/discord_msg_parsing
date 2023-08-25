@@ -4,26 +4,39 @@ require "json"
 require_relative "language"
 require_relative "ngrams"
 require_relative "word_count"
+require_relative "generate_sentence"
 
 class Runner
   def initialize(function)
     @function = function
 
-    file = File.open("data/general.json")
-    @data = JSON::parse(file.read())
+    message_data_file = File.open("./data/general.json")
+    @message_data = JSON::parse(message_data_file.read())
+
+    @bigrams = if File.file?("./data/bigrams.rb")
+      eval(File.read("./data/bigrams.rb"))
+    else
+       nil
+    end
+
+    @trigrams = if File.file?("./data/trigrams.rb")
+      eval(File.read("./data/trigrams.rb"))
+    else
+      nil
+    end
   end
 
   def start
     start_time = Time.now()
     puts "Started #{start_time}"
     
-    result = @function.call(@data)
-    
-    bigrams = result[:bigrams]
-    trigrams = result[:trigrams]
-
-    File.write("./data/bigrams.json", JSON::pretty_generate(bigrams))
-    File.write("./data/trigrams.json", JSON::pretty_generate(trigrams))
+    result = @function.call(
+      { 
+        message_data: @message_data["messages"],
+        bigrams: @bigrams,
+        trigrams: @trigrams
+      }
+    )
 
     puts result
     puts "Finished. Total duration #{Time.now - start_time} seconds"
@@ -31,4 +44,4 @@ class Runner
   
 end
 
-Runner.new(make_ngrams).start()
+Runner.new(generate_sentence).start()
