@@ -1,18 +1,29 @@
 module Language
   def self.chunk_into_sentences(words)
-    words.each_with_object([[]]) do |word, acc|
+    sentences = words.each_with_object([[]]) do |word, acc|
+      if acc.last.last == :sentence_end
+        acc.push([])
+      end
+
       if word =~ Language::sentence_ending_matcher && word !~ Language::words_with_periods
         acc.last.push(word)
-        # acc.last.push(:sentence_end) ##TBC
-        acc.push([])
+        acc.last.push(:sentence_end)
         next
       end
 
       acc.last.push(word)
     end
+
+    if sentences.last.last == :sentence_end
+      return sentences
+    else
+      *rest_of_sentences, last_sentence = sentences
+      return [*rest_of_sentences, last_sentence.push(:sentence_end)]
+    end
   end
 
   def self.is_valid_token?(word)
+    return true if word == :sentence_end
     return false if word !~ Language::valid_token_regex
 
     if word.length == 1 
@@ -23,7 +34,7 @@ module Language
   end
 
   def self.valid_token_regex
-    /^[a-z]+$|^\w+\-\w+|^[a-z]+[0-9]+[a-z]+$|^[0-9]+[a-z]+|^[a-z]+[0-9]+$/
+    /^[a-z]+$|^\w+\-\w+|^[a-z]+[0-9]+[a-z]+$|^[0-9]+[a-z]+|^[a-z]+[0-9]+$/i
   end
 
   def self.stopwords
@@ -67,7 +78,7 @@ module Language
   end
 
   def self.words_with_periods
-    /[ap]\.m(?=.)/
+    /[ap]\.m(?=.)/i
   end
 
   def self.sentence_ending_matcher
@@ -75,6 +86,8 @@ module Language
   end
 
   def self.clean_up_word(word)
+    return word if word == :sentence_end
+
     match = word.match(valid_token_regex)
     raise unless match
 
